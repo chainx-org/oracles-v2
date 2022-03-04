@@ -1,4 +1,3 @@
-
 updateOracle () {
     for assetPair in "${assetPairs[@]}"; do
         local _quorum
@@ -40,6 +39,22 @@ updateOracle () {
             pushOraclePrice "$assetPair"
         fi
     done
+}
+
+updateSpot() {
+    for ilk in "${ilks[@]}"; do
+        callSpot "$ilk"
+    done
+}
+
+updateJug() {
+    for ilk in "${ilks[@]}"; do
+        callJug "$ilk"
+    done
+}
+
+updatePot() {
+    callPot
 }
 
 #pulls latest price of an asset from each feed

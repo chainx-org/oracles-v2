@@ -18,6 +18,7 @@ importEnv () {
 	jq -e . "$config" >/dev/null 2>&1 || { error "Error - Config is not valid JSON"; exit 1; }
 
 	importMode "$config"
+	importContracts "$config"
 	importSources "$config"
 	importTransports "$config"
 	importEthereumEnv "$config"
@@ -29,6 +30,7 @@ importEnv () {
 
 	if [[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]]; then
 		importFeeds "$config"
+		importIlks "$config"
 	fi
 }
 
@@ -37,6 +39,17 @@ importMode () {
 	OMNIA_MODE="$(jq -r '.mode' < "$_config" | tr '[:lower:]' '[:upper:]')"
 	[[ "$OMNIA_MODE" =~ ^(FEED|RELAYER|RELAY){1}$ ]] || { error "Error - Invalid Mode param, valid values are 'FEED' and 'RELAYER'"; exit 1; }
 	export OMNIA_MODE
+}
+
+importContracts () {
+	local _config="$1"
+	SPOT=$(jq -r '.spot' < "$_config")
+	POT=$(jq -r '.pot' < "$_config")
+	JUG=$(jq -r '.jug' < "$_config")
+
+	export SPOT
+	export POT
+	export JUG
 }
 
 importSources () {
@@ -238,6 +251,12 @@ importFeeds () {
 	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
 }
 
+importIlks () {
+	local _config="$1"
+
+	readarray -t ilks < <(jq -r '.ilks[]' "$config")
+}
+
 importOptionsEnv () {
 	local _config="$1"
 	local _json
@@ -298,3 +317,4 @@ importScuttlebotEnv() {
 	[[ $SCUTTLEBOT_FEED_ID ]] || { error "Could not get scuttlebot feed id, make sure scuttlebot server is running"; return 1; }
 	export SCUTTLEBOT_FEED_ID
 }
+

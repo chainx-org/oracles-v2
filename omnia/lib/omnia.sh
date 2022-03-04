@@ -84,6 +84,9 @@ runFeed () {
 runRelayer () {
     while true; do
 		updateOracle
+		updateSpot
+		updatePot
+		updateJug
 		verbose "Sleeping $OMNIA_INTERVAL seconds.."
 		sleep "$OMNIA_INTERVAL"
     done

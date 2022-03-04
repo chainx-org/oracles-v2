@@ -53,7 +53,7 @@ pushOraclePrice () {
 		  return 1
 		fi
 		log "Sending tx..."
-		tx=$(ethereum --rpc-url "$ETH_RPC_URL" --gas-price "${_fees[0]}" --prio-fee "${_fees[1]}" send --async "$_oracleContract" 'poke(uint256[] memory,uint256[] memory,uint8[] memory,bytes32[] memory,bytes32[] memory)' \
+		tx=$(ethereum --rpc-url "$ETH_RPC_URL" send --async "$_oracleContract" 'poke(uint256[] memory,uint256[] memory,uint8[] memory,bytes32[] memory,bytes32[] memory)' \
 				"[$(join "${allPrices[@]}")]" \
 				"[$(join "${allTimes[@]}")]" \
 				"[$(join "${allV[@]}")]" \
@@ -65,4 +65,41 @@ pushOraclePrice () {
 		
 		# Monitoring node helper JSON
 		verbose "Transaction receipt" "tx=$tx" "maxGasPrice=${_fees[0]}" "prioFee=${_fees[1]}" "gasUsed=$_gasUsed" "status=$_status"
+}
+
+callSpot() {
+	local _ilk="$1"
+
+	log "Updating spot for $_ilk"
+	tx=$(ethereum --rpc-url "$ETH_RPC_URL" send --async "$SPOT" 'poke(bytes32)' "$_ilk")
+		
+	_status="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" status)"
+	_gasUsed="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" gasUsed)"
+		
+	# Monitoring node helper JSON
+	verbose "Transaction receipt" "tx=$tx" "maxGasPrice=${_fees[0]}" "prioFee=${_fees[1]}" "gasUsed=$_gasUsed" "status=$_status"
+}
+
+callJug() {
+	local _ilk="$1"
+
+	log "Updating jug for $_ilk"
+	tx=$(ethereum --rpc-url "$ETH_RPC_URL" send --async "$JUG" 'drip(bytes32)' "$_ilk")
+
+	_status="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" status)"
+	_gasUsed="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" gasUsed)"
+
+	# Monitoring node helper JSON
+	verbose "Transaction receipt" "tx=$tx" "maxGasPrice=${_fees[0]}" "prioFee=${_fees[1]}" "gasUsed=$_gasUsed" "status=$_status"
+}
+
+callPot() {
+	log "Updating pot"
+	tx=$(ethereum --rpc-url "$ETH_RPC_URL" send --async "$POT" 'drip()')
+
+	_status="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" status)"
+	_gasUsed="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" gasUsed)"
+
+	# Monitoring node helper JSON
+	verbose "Transaction receipt" "tx=$tx" "maxGasPrice=${_fees[0]}" "prioFee=${_fees[1]}" "gasUsed=$_gasUsed" "status=$_status"
 }
