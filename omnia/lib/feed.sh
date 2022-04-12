@@ -51,7 +51,7 @@ readSource() {
 			;;
 		gofer)
 			log "Querying ${_assetPairs[*]} prices and calculating medians with gofer..."
-			readSourcesWithGofer "${_assetPairs[@]}"
+			readSourcesWithGofer "PCX/USD"
 			;;
 		*)
 			error "Error - Unknown Feed Source: $_src"
@@ -152,7 +152,7 @@ validateAndConstructMessage() {
 	fi
 
 	#Convert asset pair to hex
-	assetPairHex=$(ethereum --to-bytes32 "$(seth --from-ascii "$_assetPair")")
+	assetPairHex=$(./../bin/ethereum --to-bytes32 "$(seth --from-ascii "$_assetPair")")
 	assetPairHex=${assetPairHex#"0x"}
 	if [[ ! "$assetPairHex" =~ ^[0-9a-fA-F]{64}$ ]]; then
 		error "Error - Failed to convert asset pair to hex:"

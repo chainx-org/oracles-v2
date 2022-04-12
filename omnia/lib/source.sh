@@ -48,7 +48,7 @@ readSourcesWithGofer()   {
 	local _output
 	_output=$(gofer price --config "$GOFER_CONFIG" --format json "$@")
 
-	echo "$_output" | jq -c '
+	pcx_price=$(echo "$_output" | jq -c '
 		.[]
 		| {
 			asset: (.base+"/"+.quote),
@@ -61,5 +61,22 @@ readSourcesWithGofer()   {
 				| add
 			)
 		}
-	'
+		| .median
+	')
+
+	pcx_wksx_reserves=$(seth call "0x2E98727Fe6BE98EDD7FB0FF699c779092B391206" "getReserves()")
+	wksx_reserves="0x${pcx_wksx_reserves: 2: 64}"
+	pcx_reserves="0x${pcx_wksx_reserves: 66: 64}"
+	wksx_ratio=$(seth --to-dec "$(seth call "0xf4fFbD250415d12Bb5Aa498CCE28ECbe85fB7141" "getAmountOut(uint, uint, uint)" 1000000000000000000 "$wksx_reserves" "$pcx_reserves")")
+	wksx_price=$(printf "%.8f" "$(echo "scale=8; ($wksx_ratio*$pcx_price)/(10^8)" | bc -l)")
+
+	wksx_sbtc_reserves=$(seth call "0x283143be67b8444a21caca116095df261acb9f09" "getReserves()")
+	wksx_reserves="0x${wksx_sbtc_reserves: 2: 64}"
+	sbtc_reserves="0x${wksx_sbtc_reserves: 66: 64}"
+	sbtc_ratio=$(seth --to-dec "$(seth call "0xf4fFbD250415d12Bb5Aa498CCE28ECbe85fB7141" "getAmountOut(uint, uint, uint)" 100000000 "$sbtc_reserves" "$wksx_reserves")")
+	sbtc_price=$(printf "%.8f" "$(echo "scale=8; ($sbtc_ratio*$wksx_price)/(10^18)" | bc -l)")
+
+	ksxusd='{"asset":"KSX/USD","median":'$wksx_price',"sources":{"KSX/USD@soswap": "'$wksx_price'"}}'
+	sbtcusd='{"asset":"SBTC/USD","median":'$sbtc_price',"sources":{"SBTC/USD@soswap": "'$sbtc_price'"}}'
+	echo "$ksxusd$sbtcusd" | jq -c
 }
