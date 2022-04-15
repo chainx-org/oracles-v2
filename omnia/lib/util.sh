@@ -81,6 +81,10 @@ getOracleSpread () {
 	[[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && getAssetInfo "$1" | cut -d ',' -f4
 }
 
+getOsmContract () {
+	[[ "$OMNIA_MODE" == "RELAYER" || "$OMNIA_MODE" == "RELAY" ]] && getAssetInfo "$1" | cut -d ',' -f5
+}
+
 signMessage () {
 	local _data
 	for arg in "$@"; do

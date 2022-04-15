@@ -38,6 +38,9 @@ updateOracle () {
             generateCalldata "${_sortedEntries[@]}"
             pushOraclePrice "$assetPair"
         fi
+
+        # call osm
+        callOsm "$assetPair"
     done
 }
 
