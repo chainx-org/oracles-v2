@@ -4,7 +4,7 @@ importEnv () {
 	if [[ -f "$OMNIA_CONFIG" ]]; then
 		config="$OMNIA_CONFIG"
 	elif [[ -f /etc/omnia.conf ]]; then
-		config="/home/hacpy/Work/Test/Backward/dai/oracles-config/omnia/config/feed.conf"
+		config="/etc/omnia.conf"
 	elif [[ -f "$_here/../config/omnia.conf" ]]; then
 		config="$_here/../config/omnia.conf"
 	else
