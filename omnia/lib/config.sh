@@ -220,7 +220,7 @@ importAssetPairsRelayer () {
 		assetPair="${assetPair^^}"
 		assetPair="${assetPair/\/}"
 		assetInfo[$assetPair]="$info"
-	done < <(jq -r '.pairs | keys[] as $assetPair | "\($assetPair)=\(.[$assetPair] | .msgExpiration),\(.[$assetPair] | .oracle),\(.[$assetPair] | .oracleExpiration),\(.[$assetPair] | .oracleSpread)"' "$_config")
+	done < <(jq -r '.pairs | keys[] as $assetPair | "\($assetPair)=\(.[$assetPair] | .msgExpiration),\(.[$assetPair] | .oracle),\(.[$assetPair] | .oracleExpiration),\(.[$assetPair] | .oracleSpread),\(.[$assetPair] | .osm),"' "$_config")
 
 	for assetPair in "${!assetInfo[@]}"; do
 		_msgExpiration=$(getMsgExpiration "$assetPair")
@@ -234,6 +234,9 @@ importAssetPairsRelayer () {
 
 		_oracleSpread=$(getOracleSpread "$assetPair")
 		[[ "$_oracleSpread" =~ ^([1-9][0-9]*([.][0-9]+)?|[0][.][0-9]*[1-9][0-9]*)$ ]] || errors+=("Error - Asset Pair param $assetPair has invalid or missing oracleSpread field, must be positive integer or float")
+
+		_osm=$(getOsmContract "$assetPair")
+		[[ "$_osm" =~ ^(0x){1}[0-9a-fA-F]{40}$ ]] || errors+=("Error - Asset Pair param $assetPair has invalid or missing osm field, must be ethereum address prefixed with 0x.")
 	done
 	[[ -z ${errors[*]} ]] || { printf '%s\n' "${errors[@]}"; exit 1; }
 }
