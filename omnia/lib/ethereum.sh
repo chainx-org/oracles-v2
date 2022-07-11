@@ -80,6 +80,22 @@ callSpot() {
 	verbose "Transaction receipt" "tx=$tx" "maxGasPrice=${_fees[0]}" "prioFee=${_fees[1]}" "gasUsed=$_gasUsed" "status=$_status"
 }
 
+callOsm() {
+	local _assetPair="$1"
+	local _osmContract
+
+	_osmContract=$(getOsmContract "$_assetPair")
+
+	log "Updating osm for $_assetPair"
+	tx=$(ethereum --rpc-url "$ETH_RPC_URL" send --async "$_osmContract" 'poke()')
+
+	_status="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" status)"
+	_gasUsed="$(timeout -s9 60 ethereum --rpc-url "$ETH_RPC_URL" receipt "$tx" gasUsed)"
+
+	# Monitoring node helper JSON
+	verbose "Transaction receipt" "tx=$tx" "maxGasPrice=${_fees[0]}" "prioFee=${_fees[1]}" "gasUsed=$_gasUsed" "status=$_status"
+}
+
 callJug() {
 	local _ilk="$1"
 
