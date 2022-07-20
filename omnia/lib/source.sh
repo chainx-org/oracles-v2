@@ -46,7 +46,7 @@ export -f _mapSetzer
 
 readSourcesWithGofer()   {
 	local _output
-	_output=$(gofer price --config "$GOFER_CONFIG" --format json "$@")
+	_output=$(gofer price --config "$GOFER_CONFIG" --format json "BTC/USD")
 
 	echo "$_output" | jq -c '
 		.[]

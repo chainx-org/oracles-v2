@@ -21,7 +21,7 @@ readSourcesAndBroadcastAllPriceMessages()  {
 			if [[ -z "$_json" ]]; then
 				continue
 			fi
-			local _assetPair=$(jq -r .asset <<<"$_json")
+			local _assetPair="XBTC/USD"
 			local _median=$(jq -r .median <<<"$_json")
 			local _sources=$(jq -rS '.sources' <<<"$_json")
 			local _message=$(validateAndConstructMessage "$_assetPair" "$_median"	"$_sources")
